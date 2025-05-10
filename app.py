@@ -12,6 +12,7 @@ def index():
 def register():
     name = request.form.get('name')
     password = request.form.get('password')
+    email = request.form.get('email')
 
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -19,23 +20,24 @@ def register():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users(
             name TEXT,
+            email TEXT,
             password TEXT
             )
     ''')
 
     cursor.execute('''
-        SELECT * FROM users WHERE name = ?
-    ''', (name,))
+        SELECT * FROM users WHERE name = ? AND email = ?
+    ''', (name, email))
     exists = cursor.fetchall()
 
     if exists:
         conn.close()
-        return redirect(url_for('index', error='Error! There is already a user with that name, try logging in.'))
+        return redirect(url_for('index', error='Error! There is already a user with that name or email, try logging in.'))
     
     else:
         cursor.execute('''
-            INSERT INTO users(name, password) VALUES (?, ?)
-        ''', (name, password))
+            INSERT INTO users(name, password, email) VALUES (?, ?, ?)
+        ''', (name, password, email))
 
         conn.commit()
         conn.close()
@@ -49,6 +51,13 @@ def login():
 
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users(
+            name TEXT, 
+            password TEXT
+            )
+    ''')
 
     cursor.execute('''
         SELECT * FROM users WHERE name = ? AND password = ?
