@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
 @app.route('/')
 def index():
@@ -19,6 +19,7 @@ def register():
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users(
+            id INTEGER PRIMARY KEY,
             name TEXT,
             email TEXT,
             password TEXT
